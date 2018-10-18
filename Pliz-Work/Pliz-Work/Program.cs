@@ -17,7 +17,7 @@ namespace Pliz_Work
         static void Main(string[] args)
         {
 
-
+            Console.WriteLine("funkar");
 
             //Game myGame = new Game(15, 6);
             //Level level = new Level();
