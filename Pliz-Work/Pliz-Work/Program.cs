@@ -13,7 +13,6 @@ namespace GridGame
     class Program
     {
 
-
         static void Main(string[] args)
         {
 
@@ -35,63 +34,86 @@ namespace GridGame
     {
         int trys = 7;
 
+        MainMenu main = new MainMenu(0);
+
         List<GameObject> GameObjects = new List<GameObject>();
 
         List<LevelBase> Levels = new List<LevelBase>();
 
         List<Scene> Scenes = new List<Scene>();
 
+        bool inSce = true;
 
         public Game(int xSize, int ySize)
         {
-
-            for (int i = 0; i < ySize + 2; i++)
-            {
-                for (int j = 0; j < xSize + 2; j++)
-                {
-                    if (j == 0 || i == 0 || i == ySize + 1 || j == xSize + 1)
-                    {
-                        GameObjects.Add(new Wall(j, i));
-                    }
-                }
-            }
+            Scenes.Add(new MainMenu(0));
+            
             GameObjects.Add(new Player(1, 1));
             Levels.Add(new Level());
         }
 
+        
         public void DrawBoard()
         {
 
-            if (trys == 7)
+
+
+            if (inSce == true)
             {
-                //yumymg
-
-
-                foreach (LevelBase i in Levels)
+                foreach (Scene sce in Scenes)
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    i.Start(0, 0);
+                    sce.Draw();
                 }
-                trys = 0;
             }
-            foreach (GameObject gameObject in GameObjects)
+            else if (inSce == false)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                gameObject.Draw(5, 3);
-                Console.ForegroundColor = ConsoleColor.White;
+                if (trys == 7)
+                {
+                    //yumymg
+
+
+                    foreach (LevelBase i in Levels)
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        i.Start(0, 0);
+                    }
+                    trys = 0;
+                }
+                foreach (GameObject gameObject in GameObjects)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    //gameObject.Draw(5, 3);
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+
+                trys++;
+
             }
-
-            trys++;
-
         }
 
         public void UpdateBoard()
         {
-            foreach (GameObject gameObject in GameObjects)
+            if (inSce == true)
             {
-                gameObject.Update();
+                foreach (Scene sce in Scenes)
+                {
+                    sce.Update();
+                    main.Update();
+                    inSce = main.getBool();
+                }
             }
+            if (inSce == false)
+            {
+                foreach (GameObject gameObject in GameObjects)
+                {
+                    gameObject.Update();
+                }
+            }
+        }
 
+        public void SceneManager(int index)
+        {
+            
         }
     }
 
@@ -318,20 +340,59 @@ namespace GridGame
     {
         public int index;
         public abstract void Draw();
+        public abstract void Update();
     }
 
     class MainMenu : Scene
     {
+        bool Cur = true;
+
+        public MainMenu(int index)
+        {
+            index = 0;
+        }
+
         public override void Draw()
         {
+            Console.Clear();
             Console.WriteLine("MainMenu.");
             Console.WriteLine();
-            Console.WriteLine("1: Play");
-            Console.WriteLine("2: Highscores");
-            Console.WriteLine("3: Load");
+            Console.WriteLine("1: New Game");
+            Console.WriteLine("2: Load");
+            Console.WriteLine("3: Highscores");
             Console.WriteLine("4: Exit");
+        }
+        
 
+        public override void Update()
+        {
             ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+
+            if (keyInfo.Key == ConsoleKey.D1)
+            {
+                Cur = false;
+                Console.Clear();
+            }
+            else if (keyInfo.Key == ConsoleKey.D2)
+            {
+
+            }
+            else if (keyInfo.Key == ConsoleKey.D3)
+            {
+
+            }
+            else if (keyInfo.Key == ConsoleKey.D4)
+            {
+                Environment.Exit(0);
+            }
+
+            //Console.ReadKey();
+        }
+
+        public bool getBool()
+        {
+            return Cur;
         }
     }
 
