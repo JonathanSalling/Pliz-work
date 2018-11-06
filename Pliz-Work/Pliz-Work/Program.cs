@@ -13,13 +13,10 @@ namespace GridGame
     class Program
     {
 
+
         static void Main(string[] args)
         {
-
-
-
             Game myGame = new Game(15, 6);
-            Level level = new Level();
 
             while (true)
             {
@@ -32,88 +29,64 @@ namespace GridGame
 
     class Game
     {
-        int trys = 7;
+        int trys = 0; // var sjunde turn så ritas bannan ut igen
 
-        MainMenu main = new MainMenu(0);
+        string curLevelFileName = "LevelOne"; // använd för att hitta vilken level som väljs
 
         List<GameObject> GameObjects = new List<GameObject>();
-
+        List<Collectible> collss;
         List<LevelBase> Levels = new List<LevelBase>();
-
-        List<Scene> Scenes = new List<Scene>();
-
-        bool inSce = true;
+        List<Block> blockss;
 
         public Game(int xSize, int ySize)
         {
-            Scenes.Add(new MainMenu(0));
-            
             GameObjects.Add(new Player(1, 1));
-            Levels.Add(new Level());
+            AddLevels();
         }
 
-        
         public void DrawBoard()
         {
 
-
-
-            if (inSce == true)
+            if (trys == 7)
             {
-                foreach (Scene sce in Scenes)
+                foreach (LevelBase i in Levels)
                 {
-                    sce.Draw();
-                }
-            }
-            else if (inSce == false)
-            {
-                if (trys == 7)
-                {
-                    //yumymg
-
-
-                    foreach (LevelBase i in Levels)
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        i.Start(0, 0);
-                    }
-                    trys = 0;
-                }
-                foreach (GameObject gameObject in GameObjects)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    //gameObject.Draw(5, 3);
                     Console.ForegroundColor = ConsoleColor.White;
+                    i.Start(0, 0);
                 }
-
-                trys++;
-
+                trys = 0;
             }
+            foreach (GameObject gameObject in GameObjects)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                gameObject.Draw(5, 3);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            trys++;
+
+        }
+
+        public void AddLevels()
+        {
+            trys = 7;
+            Levels.Add(new Level(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "LevelOne.txt"))));
+
+        }
+
+        public void getLists()
+        {
+            collss = Levels[1].SendColls;
+            blockss = Levels[1].SendBlocks;
         }
 
         public void UpdateBoard()
         {
-            if (inSce == true)
+            foreach (GameObject gameObject in GameObjects)
             {
-                foreach (Scene sce in Scenes)
-                {
-                    sce.Update();
-                    main.Update();
-                    inSce = main.getBool();
-                }
+                gameObject.Update();
             }
-            if (inSce == false)
-            {
-                foreach (GameObject gameObject in GameObjects)
-                {
-                    gameObject.Update();
-                }
-            }
-        }
 
-        public void SceneManager(int index)
-        {
-            
         }
     }
 
@@ -125,41 +98,18 @@ namespace GridGame
         public abstract void Update();
     }
 
-    class Wall : GameObject
-    {
-        public Wall(int xPosition, int yPosition)
-        {
-            XPosition = xPosition;
-            YPosition = yPosition;
-        }
-
-        public override void Draw(int xBoxSize, int yBoxSize)
-        {
-            int startX = XPosition * xBoxSize;
-            int startY = YPosition * yBoxSize;
-            //Console.SetCursorPosition(startX, startY);
-            //Console.Write("█");
-            //Console.SetCursorPosition(startX, startY + 1);
-            //Console.Write(" ██ ");
-            //Console.SetCursorPosition(startX, startY + 2);
-            //Console.Write("█  █");
-        }
-
-        public override void Update()
-        {
-
-        }
-    }
-
     class Player : GameObject
     {
         int lastX;
         int lastY;
 
+        List<Collectible> collse;
+
         public Player(int xPos, int yPos)
         {
             XPosition = xPos;
             YPosition = yPos;
+
         }
 
         public override void Draw(int xBoxSize, int yBoxSize)
@@ -210,21 +160,25 @@ namespace GridGame
         public string fileText;
 
         public abstract void Start(int x, int y);
+        public List<Collectible> SendColls;
+        public List<Block> SendBlocks;
     }
 
     class Level : LevelBase
     {
-        string ranLevel = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "LevelOne.txt"));
+        public List<Block> blocks = new List<Block>();
+        public List<Collectible> colls = new List<Collectible>();
+
         char[] lines;
+
+        ConsoleColor curColor;
 
         Random rnd;
 
-        public Level()
+        public Level(string levelData)
         {
-
+            fileText = levelData;
         }
-
-
 
         public override void Start(int x, int y)
         {
@@ -238,9 +192,9 @@ namespace GridGame
 
             rnd = new Random();
 
-            List<Block> blocks = new List<Block>();
 
-            lines = ranLevel.ToCharArray(0, ranLevel.Length);
+
+            lines = fileText.ToCharArray(0, fileText.Length);
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -252,12 +206,14 @@ namespace GridGame
                 {
                     write = true;
                     curX += offset;
+                    curColor = ConsoleColor.White;
                 }
                 if (curChar.ToString() == "0")
                 {
                     write = false;
                     vertical = false;
                     curX += offset;
+                    curColor = ConsoleColor.White;
                 }
                 if (curChar.ToString() == "2")
                 {
@@ -265,6 +221,7 @@ namespace GridGame
                     vertical = false;
                     curX = x;
                     curY += offset;
+                    curColor = ConsoleColor.White;
                 }
                 if (curChar.ToString() == "3")
                 {
@@ -277,14 +234,95 @@ namespace GridGame
                         write = false;
                     }
 
-                    vertical = true;
                     curX += offset;
                 }
+                if (curChar.ToString() == "4")
+                {
+                    write = false;
+                    curX += offset;
+                    curColor = ConsoleColor.Green;
+                    colls.Add(new Collectible(curX, curY, curColor, false));
+                }
+                if (curChar.ToString() == "5")
+                {
+                    write = false;
+                    curX += offset;
+                    curColor = ConsoleColor.Blue;
+                    colls.Add(new Collectible(curX, curY, curColor, true));
+                }
 
-                blocks.Add(new Block(curX, curY, write, vertical));
+                blocks.Add(new Block(curX, curY, write, vertical, curColor));
                 blocks[i].Draw(curX, curY);
+
+            }
+            for (int i = 0; i < colls.Count; i++)
+            {
+                colls[i].Draw(0, 0);
             }
         }
+        public List<Collectible> SendColls()
+        {
+            return colls;
+        }
+        public List<Block> SendBlocks()
+        {
+            return blocks;
+        }
+    }
+
+    class Collectible : GameObject
+    {
+
+        int xPosition;
+        int yPosition;
+
+        public static bool touched = false;
+        public bool destroyed = false;
+        public bool chest;
+
+        ConsoleColor collColor;
+
+        public Collectible(int xPos, int yPos, ConsoleColor color, bool ischest)
+        {
+            xPosition = xPos;
+            yPosition = yPos;
+            collColor = color;
+            chest = ischest;
+        }
+
+
+        public override void Draw(int xBoxSize, int yBoxSize)
+        {
+
+            if (!destroyed)
+            {
+                Console.SetCursorPosition(xPosition, yPosition);
+
+                Console.ForegroundColor = collColor;
+
+                Console.Write("█");
+            }
+            else
+            {
+                Console.Write(" ");
+            }
+
+        }
+
+        public override void Update()
+        {
+            if (touched)
+            {
+                destroyed = true;
+            }
+        }
+
+        public void istouched(bool thouched)
+        {
+            touched = thouched;
+        }
+
+
     }
 
     class Block : GameObject
@@ -292,16 +330,19 @@ namespace GridGame
         int xPosition;
         int yPosition;
 
+        ConsoleColor blockColor;
+
         bool write;
 
         bool vert;
 
-        public Block(int xPos, int yPos, bool ifWrite, bool vertical)
+        public Block(int xPos, int yPos, bool ifWrite, bool vertical, ConsoleColor color)
         {
             xPosition = xPos;
             yPosition = yPos;
             write = ifWrite;
             vert = vertical;
+            blockColor = color;
         }
 
 
@@ -318,6 +359,7 @@ namespace GridGame
                 if (vert)
                 {
                     Console.SetCursorPosition(x, y);
+                    Console.ForegroundColor = blockColor;
                     Console.Write("█");
                     //Console.SetCursorPosition(x, y + 1);
                     //Console.Write("██");
@@ -332,140 +374,6 @@ namespace GridGame
             else
             {
                 Console.Write(" ");
-            }
-        }
-    }
-
-    abstract class Scene
-    {
-        public int index;
-        public abstract void Draw();
-        public abstract void Update();
-    }
-
-    class MainMenu : Scene
-    {
-        bool Cur = true;
-
-        public MainMenu(int index)
-        {
-            index = 0;
-        }
-
-        public override void Draw()
-        {
-            Console.Clear();
-            Console.WriteLine("MainMenu.");
-            Console.WriteLine();
-            Console.WriteLine("1: New Game");
-            Console.WriteLine("2: Load");
-            Console.WriteLine("3: Highscores");
-            Console.WriteLine("4: Exit");
-        }
-        
-
-        public override void Update()
-        {
-            ConsoleKeyInfo keyInfo = Console.ReadKey();
-
-
-            if (keyInfo.Key == ConsoleKey.D1)
-            {
-                Cur = false;
-                Console.Clear();
-            }
-            else if (keyInfo.Key == ConsoleKey.D2)
-            {
-
-            }
-            else if (keyInfo.Key == ConsoleKey.D3)
-            {
-
-            }
-            else if (keyInfo.Key == ConsoleKey.D4)
-            {
-                Environment.Exit(0);
-            }
-
-            //Console.ReadKey();
-        }
-
-        public bool getBool()
-        {
-            return Cur;
-        }
-    }
-
-    static class HighScore
-    {
-        static string path = "HighScores.txt";
-        static List<int> HighScorePoints;
-        static List<string> HighScoreNames;
-
-        public static void ShowHighScores()
-        {
-            Console.WriteLine("Highscores.");
-            Console.WriteLine();
-
-            for (int i = 0; i < HighScorePoints.Count; i++)
-            {
-                Console.WriteLine(HighScorePoints[i] + " " + HighScoreNames[i]);
-            }
-        }
-
-        public static void ReadHighScores()
-        {
-            HighScoreNames = new List<string>();
-            HighScorePoints = new List<int>();
-            string[] lines = System.IO.File.ReadAllLines(path);
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (i % 2 == 0)
-                {
-                    HighScorePoints.Add(Convert.ToInt32(lines[i]));
-                }
-                else
-                {
-                    HighScoreNames.Add(lines[i]);
-                }
-            }
-        }
-
-        public static void WriteHighScores()
-        {
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(path))
-            {
-                for (int i = 0; i < HighScorePoints.Count; i++)
-                {
-                    file.WriteLine(HighScorePoints[i]);
-                    file.WriteLine(HighScoreNames[i]);
-                }
-            }
-        }
-
-        public static void AddHighScore(string name, int score)
-        {
-            for (int i = 0; i < HighScorePoints.Count; i++)
-            {
-                if (i == HighScorePoints.Count)
-                {
-                    HighScorePoints.Add(score);
-                    HighScoreNames.Add(name);
-                    break;
-                }
-                else if (score > HighScorePoints[i])
-                {
-                    HighScorePoints.Insert(i, score);
-                    HighScoreNames.Insert(i, name);
-                    break;
-                }
-            }
-
-            if (HighScorePoints.Count > 5)
-            {
-                HighScorePoints.RemoveAt(6);
-                HighScoreNames.RemoveAt(6);
             }
         }
     }
