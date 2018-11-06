@@ -16,9 +16,6 @@ namespace GridGame
 
         static void Main(string[] args)
         {
-
-
-
             Game myGame = new Game(15, 6);
             Level level = new Level();
 
@@ -56,6 +53,7 @@ namespace GridGame
                 }
             }
             GameObjects.Add(new Player(1, 1));
+            GameObjects.Add(new Enemy(10, 20));
             Levels.Add(new Level());
         }
 
@@ -64,9 +62,6 @@ namespace GridGame
 
             if (trys == 7)
             {
-                //yumymg
-
-
                 foreach (LevelBase i in Levels)
                 {
                     Console.ForegroundColor = ConsoleColor.White;
@@ -90,6 +85,7 @@ namespace GridGame
             foreach (GameObject gameObject in GameObjects)
             {
                 gameObject.Update();
+                Console.CursorVisible = false;
             }
 
         }
@@ -154,7 +150,6 @@ namespace GridGame
         public override void Update()
         {
             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            Console.CursorVisible = false;
 
             Erase();
 
@@ -179,6 +174,37 @@ namespace GridGame
         public void Erase()
         {
             Console.SetCursorPosition(lastX, lastY);
+            Console.Write(" ");
+        }
+    }
+
+    class Enemy : GameObject
+    {
+        int enemyLastX;
+        int enemyLastY;
+
+
+        public Enemy(int enemyYPos, int enemyXPos)
+        {
+            YPosition = enemyYPos;
+            XPosition = enemyXPos;
+        }
+
+        public override void Draw(int xBoxSize, int yBoxSize)
+        {
+            Console.SetCursorPosition(XPosition, YPosition);
+            Console.Write("█");
+        }
+
+        public override void Update()
+        {
+
+            Erase();
+        }
+
+        public void Erase()
+        {
+            Console.SetCursorPosition(enemyLastX, enemyLastY);
             Console.Write(" ");
         }
     }
@@ -408,7 +434,5 @@ namespace GridGame
             }
         }
     }
-
-
 }
 
