@@ -43,7 +43,6 @@ namespace GridGame
             GameObjects.Add(new Player(1, 1));
             AddLevels();
             GameObjects.Add(new Enemy(10, 20));
-            Levels.Add(new Level());
         }
 
         public void DrawBoard()
