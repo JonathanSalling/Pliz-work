@@ -60,10 +60,11 @@ namespace GridGame
 
             if (inSce == true)
             {
-                foreach (Scene sce in Scenes)
-                {
-                    sce.Draw();
-                }
+                main.Draw();
+                //foreach (Scene sce in Scenes)
+                //{
+                //    sce.Draw();
+                //}
             }
             else if (inSce == false)
             {
@@ -95,12 +96,16 @@ namespace GridGame
         {
             if (inSce == true)
             {
-                foreach (Scene sce in Scenes)
-                {
-                    sce.Update();
-                    main.Update();
-                    inSce = main.getBool();
-                }
+                //sce.Update();
+                main.Update();
+                inSce = main.GetBool();
+
+                //foreach (Scene sce in Scenes)
+                //{
+                //    sce.Update();
+                //    main.Update();
+                //    inSce = main.GetBool();
+                //}
             }
             if (inSce == false)
             {
@@ -390,7 +395,7 @@ namespace GridGame
             //Console.ReadKey();
         }
 
-        public bool getBool()
+        public bool GetBool()
         {
             return Cur;
         }
