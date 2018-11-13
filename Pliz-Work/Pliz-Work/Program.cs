@@ -13,7 +13,6 @@ namespace GridGame
     class Program
     {
 
-
         static void Main(string[] args)
         {
             Game myGame = new Game(15, 6);
@@ -29,18 +28,26 @@ namespace GridGame
 
     class Game
     {
-        int trys = 0; // var sjunde turn så ritas bannan ut igen
+        int trys = 7;
 
         string curLevelFileName = "LevelOne"; // använd för att hitta vilken level som väljs
+        MainMenu main = new MainMenu(0);
 
         List<GameObject> GameObjects = new List<GameObject>();
         List<Collectible> collss;
         List<LevelBase> Levels = new List<LevelBase>();
         List<Block> blockss;
 
+        List<Scene> Scenes = new List<Scene>();
+
+        bool inSce = true;
+
         public Game(int xSize, int ySize)
         {
+            Scenes.Add(new MainMenu(0));
+
             GameObjects.Add(new Player(1, 1));
+            Levels.Add(new Level());
             AddLevels();
         }
 
@@ -63,6 +70,36 @@ namespace GridGame
                 Console.ForegroundColor = ConsoleColor.White;
             }
 
+
+            if (inSce == true)
+            {
+                main.Draw();
+                //foreach (Scene sce in Scenes)
+                //{
+                //    sce.Draw();
+                //}
+            }
+            else if (inSce == false)
+            {
+                if (trys == 7)
+                {
+                    //yumymg
+
+
+                    foreach (LevelBase i in Levels)
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        i.Start(0, 0);
+                    }
+                    trys = 0;
+                }
+                foreach (GameObject gameObject in GameObjects)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    //gameObject.Draw(5, 3);
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+
             trys++;
 
         }
@@ -74,6 +111,29 @@ namespace GridGame
 
         }
 
+        public void UpdateBoard()
+        {
+            if (inSce == true)
+            {
+                //sce.Update();
+                main.Update();
+                inSce = main.GetBool();
+
+                //foreach (Scene sce in Scenes)
+                //{
+                //    sce.Update();
+                //    main.Update();
+                //    inSce = main.GetBool();
+                //}
+            }
+            if (inSce == false)
+            {
+                foreach (GameObject gameObject in GameObjects)
+                {
+                    gameObject.Update();
+                }
+            }
+        }
         public void GetLists()
         {
             collss = Levels[1].SendColls;
@@ -87,6 +147,9 @@ namespace GridGame
                 gameObject.Update();
             }
 
+        public void SceneManager(int index)
+        {
+
         }
     }
 
@@ -96,6 +159,32 @@ namespace GridGame
         public int YPosition;
         public abstract void Draw(int xBoxSize, int yBoxSize);
         public abstract void Update();
+    }
+
+    class Wall : GameObject
+    {
+        public Wall(int xPosition, int yPosition)
+        {
+            XPosition = xPosition;
+            YPosition = yPosition;
+        }
+
+        public override void Draw(int xBoxSize, int yBoxSize)
+        {
+            int startX = XPosition * xBoxSize;
+            int startY = YPosition * yBoxSize;
+            //Console.SetCursorPosition(startX, startY);
+            //Console.Write("█");
+            //Console.SetCursorPosition(startX, startY + 1);
+            //Console.Write(" ██ ");
+            //Console.SetCursorPosition(startX, startY + 2);
+            //Console.Write("█  █");
+        }
+
+        public override void Update()
+        {
+
+        }
     }
 
     class Player : GameObject
@@ -109,7 +198,6 @@ namespace GridGame
         {
             XPosition = xPos;
             YPosition = yPos;
-
         }
 
         public override void Draw(int xBoxSize, int yBoxSize)
@@ -198,7 +286,7 @@ namespace GridGame
     {
         public List<Block> blocks = new List<Block>();
         public List<Collectible> colls = new List<Collectible>();
-
+        string ranLevel = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "LevelOne.txt"));
         char[] lines;
 
         ConsoleColor curColor;
@@ -222,9 +310,9 @@ namespace GridGame
 
             rnd = new Random();
 
+            List<Block> blocks = new List<Block>();
 
-
-            lines = fileText.ToCharArray(0, fileText.Length);
+            lines = ranLevel.ToCharArray(0, ranLevel.Length);
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -302,7 +390,6 @@ namespace GridGame
 
     class Collectible : GameObject
     {
-
         int xPosition;
         int yPosition;
 
